@@ -210,5 +210,56 @@ public class RabbitConfig {
    }
    ```
 
-   
+
+
+### Kafka 
+
+메시지 브로커이다.
+
+- Cluster
+  - 여러 개의 브로커로 구성된다.
+  - 각 브로커는 토픽의 파티션 리더로 동작한다.
+- Topic
+- Partition
+
+카프카의 토픽은 클러스터의 모든 브로커에 걸쳐 복제된다.
+
+클러스터의 각 노드는 하나 이상의 토픽에 대한 리더로 동작한다. 토픽데이터를 관리하고 클러스터의 다른 노드로 데이터를 복제한다.
+
+#### dependency
+
+```gradle
+implementation 'org.springframework.kafka:spring-kafka'
+```
+
+#### `application.yml`
+
+```yaml
+spring:
+  kafka:
+  
+    # kafka 서버들의 위치 설정
+    bootstrap-servers: 
+    - xxx.com:9092
+    - xxx.com:9093
+    
+    template:
+      default-topic: ... # set default topic
+```
+
+#### methods
+
+`ListenableFuture<SendResult<K,V>> send(...)`
+
+`ListenableFuture<SendResult<K, V>> sendDefault(...)`
+
+- default topic을 지정했을 시 topic을 적지 않아도 됨
+
+#### send message
+
+```java
+public void sendMessage(HelloDate data) {
+    kafkaTemplate.send("kr.carrot.topic", data);
+}
+```
 

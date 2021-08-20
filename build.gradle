@@ -29,6 +29,9 @@ dependencies {
     // AMQP for RabbitMQ
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
+    // kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2:'
     annotationProcessor 'org.projectlombok:lombok'
