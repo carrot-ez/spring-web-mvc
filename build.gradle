@@ -32,6 +32,10 @@ dependencies {
     // kafka
     implementation 'org.springframework.kafka:spring-kafka'
 
+    // spring integration
+    implementation 'org.springframework.boot:spring-boot-starter-integration';
+    implementation 'org.springframework.integration:spring-integration-file'; // 스프링 통합의 엔드포인트 모듈
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2:'
     annotationProcessor 'org.projectlombok:lombok'
