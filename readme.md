@@ -518,3 +518,288 @@ public IntegrationFlow flowName() {
 }
 ```
 
+
+
+## Service Activator
+
+입력채널로부터 수신한 메시지를 MessageHandler에 전달하는 컴포넌트
+
+### MessageHandler Bean 정의
+
+```java
+@Bean
+public MessageHandler sysoutHandler() {
+    return message -> {
+        Sutem.out.println("Message: " + message.getPayload());
+    }
+}
+```
+
+### 자바 DSL
+
+```java
+@Bean
+public IntegrationFlow flowName() {
+	return IntegrationFlows
+        ...
+        .handle(msg -> {
+            System.out.println("Message: " + message.getPayload());
+        })
+        //.handle(sysoutHandler()) // Bean 사용
+        ...
+        .get();
+}
+```
+
+```java
+	return IntegrationFlows
+        ...
+        /* GenericHandler 사용 */
+        .<ReturnType>handle((payload, headers) -> {
+            // do something
+            return new ReturnType(payload, headers);
+        })
+        ...
+        .get();
+```
+
+- `MessageHandler` 또는 `GenericHandler`를 구현하여 사용 가능하다.
+- `GenericHandler`는 메시지의 데이터 처리 후 새로운 `payload`를 반환할 때 사용한다.
+- `GenricHandler`를 마지막에 사용할 시 `null`을 리턴해야 한다. 그렇지 않으면 지정된 출력 채널이 없다는 에러가 발생한다.
+
+
+
+## Gateway
+
+### interface 사용
+
+```java
+@Components
+@MessagingGateway(defaultRequestChannel="inChannel",
+                 defaultReplyChannel="outChannel")
+public interface UpperCaseGateway {
+    String uppercase(String in);
+}
+```
+
+### 자바 DSL
+
+```java
+@Bean
+public IntegrationFlow uppercaseFlow() {
+    return IntegrationFlows
+        .from("inChannel")
+        .<String, String> transform(s -> s.toUpperCase())
+        .channel("outChannel")
+        .get();
+}
+```
+
+둘은 같은 동작을 수행한다.
+
+
+
+## Channel Adapter
+
+통합 플로우의 입구와 출구
+
+데이터는 `inbound` 채널 어댑터를 통해 통합 플로우로 들어온 후, `outbound` 채널 어댑터를 통해 통합 플로우에서 나간다.
+
+### inbound 
+
+- `@InboundChannelAdapter` + `MessageSource` Bean을 만들어 설정한다.
+- 자바 DSL의 `from` 메서드에서 설정한다.
+
+### outbound
+
+- `@OutboundChannelAdapter` + `MessageSource` Bean을 만들어 설정한다.
+- 자바 DSL의 `handle` 메서드에서 설정한다.
+
+
+
+## Endpoint Module
+
+외부 시스템과의 연계를 위해 광범위한 모듈을 제공한다.
+
+- File System
+- HTTP
+- JPA
+- Email
+- ... 등등 자세한 내용은 공식 문서 참고
+
+
+
+# 10 Project Reactor
+
+### 명령형 코드 vs 리액티브 코드
+
+명령형 코드
+
+- 동기적으로 수행된다.
+- 데이터는 모아서 처리된다.
+- `물풍선`
+
+리액티브 코드
+
+- 비동기적으로 수행된다.
+- 처리가 끝난 데이터를 다음 작업에서 계속 작업할 수 있다.
+- `정원용 호스`
+
+리액티브 프로그래밍은 함수적이면서 선언적이다.
+
+파이프라인이나 스트림을 포함하여 처리 가능한 데이터가 있을 때마다 처리한다.
+
+## Reactive Stream
+
+### 목적
+
+차단되지 않는 백 프레셔를 갖는 비동기 스트림 처리의 표준을 제공하는 것
+
+### 백 프레셔
+
+데이터를 소비하는 컨슈머가 처리할 수 있는 만큼 전달 데이터를 제한하는 것
+
+### 자바 스트림 vs 리액티브 스트림
+
+자바스트림
+
+- 동기
+- 한정된 데이터셋
+
+리액티브 스트림
+
+- 비동기
+- 실시간 데이터 처리
+- 무한한 데이터셋
+
+### Interface
+
+- `Publisher`
+- `Subscriber`
+- `Subscription`
+- `Processor`
+
+### Publisher
+
+```java
+public interface Publisher<T> {
+    void subscribe(Subscriber<? super T) subscriber);
+}
+```
+
+### Subscriber
+
+```java
+public interface S니bscr“iber<T> {
+    void onSubscribe(Subscription sub);
+    void onNext(T item);
+    void onError(Throwable ex);
+    void onComplete();
+}
+```
+
+### Subscription
+
+```java
+public interface Subscription {
+    void request(long n); // 데이터 전송 요청 // n = 백 프레셔
+	void cancel();  // 구독 취소
+}
+```
+
+### Processor
+
+```java
+public interface Processor<T, R> extends Subscriber<T>, Publisher<R> { }
+```
+
+### dependency
+
+```gradle
+// reactor 의존성 추가
+implementation 'io.projectreactor:reactor-core';
+testImplementation 'io.projectreactor:reactor-test';
+```
+
+### Type
+
+- `Mono`
+  - 하나의 데이터 항목을 갖는 데이터셋에 적합
+- `Flux`
+  - 여러 개의 데이터 항목을 갖는 데이터셋에 적합
+
+### 생성
+
+```java
+@Test
+pubnlic void createFlux() {
+    Flux<String> fruitFlux = Flux
+        .just("apple", "orange", "banana") // 데이터만 선언, 수도꼭지에 호스만 끼운 상태
+        .subscribe(f -> System.out.println("here's: " + f)); // 데이터가 전달되기 시작한다. 수도꼭지의 물을 튼 상태
+        
+    // Assertion
+    StepVerifier
+        .create(fruitFlux)
+        .expectNext("apple")
+        .expectNext("orange")
+        .expectNext("banana")
+        .verifyComplete();
+}
+```
+
+- `StepVerifier`를 통해 `Flux` 구독 테스트할 수 있다.
+
+```java
+// 배열로도 생성
+String[] fruits = new String[] {"apple", "orange", "banana"};
+
+Flux<String> fruitFlux = Flux.fromArray(fruits);
+```
+
+```java
+// Iterable 구현체로부터 생성
+List<String> fruitList = new ArrayList<>();
+fruitList.add("apple");
+fruitList.add("orange");
+fruitList.add("banana");
+
+Flux<String> fruitFlux = Flux.fromIterable(fruitList);
+```
+
+```java
+// Stream 으로부터 생성
+Stream<String> fruitStream = Stream.of("apple", "orange", "banan");
+
+Flux<String> fruitFlux = Flux.fromStream(fruitStream);
+```
+
+### Flux method
+
+- `mergeWith`
+- `zip`
+- `first`
+  - 먼저 도착하는 Flux만 처리
+- `skip`
+  1. 처음 n개의 항목을 스팁
+  2. 처음 n초동안 스킵
+- `take`
+  1. 처음 n개만을 처리
+  2. 처음 n초만큼을 처리
+- `filter`
+- `distinct`
+- `map`
+- `flatMap`
+- `buffer`
+  - 반환된 요소를 지정된 크기의 List로 버퍼링한다.
+  - 버퍼링된 요소를 `flatMap`을 통해 병렬처리할 수 있다.
+- `collectList`
+  - `Flux` 를 `Mono<List>` 로 변환한다.
+- `collectMap`
+  - `Flux` 를 `Mono<Map>` 로 변환한다.
+- `all`
+- `any`
+
+
+
+## Reactive API
+
