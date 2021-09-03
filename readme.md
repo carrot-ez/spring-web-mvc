@@ -801,5 +801,62 @@ Flux<String> fruitFlux = Flux.fromStream(fruitStream);
 
 
 
-## Reactive API
+# 11 Reactive API - Spring WebFlux
+
+### Dependency
+
+```gradle
+implementation 'org.springframework.boot:spring-boot-starter-webflux';
+```
+
+- default WAS = Netty
+
+
+
+# Spring Cloud Eureka Server
+
+### dependency
+
+```build.gradle
+implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+```
+
+`@EnableEurekaServer` 설정
+
+```java
+@SpringBootApplication
+@EnableEurekaServer
+public class EurekaApplication {
+	public static void main(String[] args) {
+		SpringApplication.run(EurekaApplication.class, args);
+	}
+}
+```
+
+#### 단일 유레카 서버 구성
+
+- 프로덕션 배포시에는 여러 유레카 서버를 사용해 고가용성을 유지하는 것이 좋지만, 개발시에는 단일 유레카 서버로 하는것이 바람직하다.
+
+```yaml
+# application.yml
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    fetch-registry: false
+    register-with-eureka: false
+    service-url:
+      default-zone: http://${eureka.instance.hostname}:${server.port}/eureka/
+```
+
+#### 자체보존 모드
+
+유레카 서버는 30초마다 서비스 인스턴스의 생존 확인을 한다. 이 과정이 3회 실패시에 레지스트리에 저장된 서비스를 제거하는데, 이와 같은 과정이 임계값을 초과하면 유레카 서버는 네트워크 문제가 생긴 것으로 간주하고 레지스트리의 나머지 서비스 데이터를 보존하기 위해 **자체보존 모드**가 활성화된다.
+
+production 단계에서는 자체보존 모드를 활성화 하는 것이 좋으나, 개발시에는 문제가 될 수 있어 비활성화 하여 개발할 수 있다. `eureka.server.enable-self-preservation: false` 로 설정하여 자체보존을 비활성화 할 수 있다.
+
+
 

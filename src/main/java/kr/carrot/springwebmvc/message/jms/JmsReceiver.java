@@ -14,7 +14,7 @@ public class JmsReceiver {
 
 
 //    @JmsListener(destination = "mailbox", containerFactory = "myFactory")
-    @JmsListener(destination = "mailbox")
+//    @JmsListener(destination = "mailbox")
     public void receiveTestMessage(HelloData helloData) {
 
         System.out.println(helloData);

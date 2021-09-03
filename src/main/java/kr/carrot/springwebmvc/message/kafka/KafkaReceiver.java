@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class KafkaReceiver {
 
-    @KafkaListener(topics = "kr.carrot.topic", groupId = "group.carrot")
+//    @KafkaListener(topics = "kr.carrot.topic", groupId = "group.carrot")
     public void receiveMessage(String message) {
         System.out.println("KafkaReceiver.receiveMessage");
 

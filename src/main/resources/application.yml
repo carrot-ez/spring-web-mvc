@@ -1,4 +1,19 @@
 logging:
   # level.org.apache.coyote.http11: debug
-
 spring:
+  config:
+    import: "optional:configserver:"
+  application:
+    name: test
+  profiles:
+    active: dev
+  cloud:
+    config:
+      uri: http://localhost:8888
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refreshF

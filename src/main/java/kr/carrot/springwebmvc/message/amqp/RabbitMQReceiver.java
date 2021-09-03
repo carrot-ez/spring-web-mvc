@@ -40,7 +40,7 @@ public class RabbitMQReceiver {
 
 
     /* push model */
-    @RabbitListener(queues = "kr.carrot.queue")
+//    @RabbitListener(queues = "kr.carrot.queue")
     public void receiveMessageWithPushModel(final HelloData data) {
         System.out.println("RabbitMQReceiver.receiveMessageWithPushModel");
 
