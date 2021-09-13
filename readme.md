@@ -860,3 +860,26 @@ production 단계에서는 자체보존 모드를 활성화 하는 것이 좋으
 
 
 
+## Logging
+
+`@Slf4j` 로 로깅할 때 `+` 연산을 사용하면 성능저하가 일어난다.
+
+1. `log.debug("data=" + data);` 
+
+2. `log.debug("data={}", data)` 👍
+
+1의 경우 운영에서 로깅되지 않는 debug level임에도 항상 `+` 연산을 통해 문자열 병합이 일어남으로 성능저하가 발생한다.
+
+
+
+## Controller
+
+쿼리스트링을 받을 때 primitive type이면 `@RequestParam`, object 이면 `@ModelAttribute`를 기본으로 사용한다.
+
+1. `String notice(String id)` == `String notice(@RequestParam String id)`
+2. `String notice(SimpleDto data)` == `String notice(@ModelAttribute SimpleDto data)`
+
+쿼리스트링을 하나씩 받을 때는 `@RequestParam`을, 객체에 저장하여 한번에 받을 때는 `@ModelAttribute`를 사용한다. 
+
+같은 이유로 `@RequestBody`는 생략이 불가능하다. `@RequestParam`과 `@ModelAttribute`가 기본값으로 설정되어 있기 때문이다.
+
