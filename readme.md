@@ -883,3 +883,16 @@ production 단계에서는 자체보존 모드를 활성화 하는 것이 좋으
 
 같은 이유로 `@RequestBody`는 생략이 불가능하다. `@RequestParam`과 `@ModelAttribute`가 기본값으로 설정되어 있기 때문이다.
 
+`@ModelAttribute`는 객체 생성 -> setter로 데이터 바인딩 순으로 진행된다. 데이터 바인딩 과정에서 데이터 타입 등 문제가 발생하면 데이터 바인딩 예외를 반환한다.
+
+
+
+### `@RequestMapping`
+
+특정 조건에 맞는 요청만 실행할 수 있다.
+
+- `params = "..."` 
+- `headers = "..."` 
+- `consumes = "..."` content-type 헤더 기반 media type
+- `produces = "..."` accept 헤더 기반 media type
+
