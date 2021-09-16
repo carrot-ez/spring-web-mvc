@@ -2,6 +2,7 @@ package kr.carrot.springmvc2.itemservice.controller;
 
 import kr.carrot.springmvc2.itemservice.domain.item.Item;
 import kr.carrot.springmvc2.itemservice.domain.item.ItemRepository;
+import kr.carrot.springmvc2.itemservice.domain.item.ItemType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -28,6 +29,11 @@ public class FormItemController {
         regions.put("BUSAN", "부산");
         regions.put("JEJU", "제주");
         return regions;
+    }
+
+    @ModelAttribute("itemTypes")
+    public ItemType[] itemTypes() {
+        return ItemType.values();
     }
 
     @GetMapping
